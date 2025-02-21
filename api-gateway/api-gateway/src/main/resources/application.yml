@@ -1,0 +1,67 @@
+server:
+  port: 8080  # Port for API Gateway
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+      routes:
+        - id: auth-service
+          uri: http://localhost:9010
+          predicates:
+            - Path=/auth/**
+
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/user/**
+
+        - id: course-service
+          uri: lb://course-service
+          predicates:
+            - Path=/course/**
+
+
+        - id: quiz-service
+          uri: lb://quiz-service
+          predicates:
+            - Path=/quiz/**
+
+        - id: notification-service
+          uri: lb://NOTIFICATION-SERVICE
+          predicates:
+              - Path=/notifications/**
+
+        - id: media-service
+          uri: lb://MEDIA-SERVICE
+          predicates:
+              - Path=/media/**
+
+
+feign:
+  hystrix:
+    enabled: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+jwt:
+  secretKey: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyQGVtYWlsLmNvbSIsImV4cCI6MTY4Njk0OTM4MH0.V4ER2fbH6v2nZmQDfyCQ3rfMNlgnlMJ8-eqvRFsz2OU # Use environment variable for security
